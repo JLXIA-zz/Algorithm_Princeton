@@ -1,0 +1,159 @@
+/*******************************************
+ 
+ * Project Name: 8-Puzzle Solver
+ * Author : JL Xia
+ * Dependent: Board.java
+ * 
+ ******************************************/
+
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
+
+
+public class Solver {
+    private MinPQ<searchNode> trials, twintrials;
+    private Board initial;
+    private boolean solvable;
+    
+    private static Comparator<searchNode> hummingcomparator = new Comparator<searchNode>(){
+
+		@Override
+		public int compare(searchNode node0, searchNode node1) {
+			int hamming0 = node0.moves + node0.initial.hamming();
+			int hamming1 = node1.moves + node1.initial.hamming();
+			return  Double.compare((double) hamming0, (double) hamming1); 
+		}
+    };
+    
+    private static Comparator<searchNode> manhattancomparator = new Comparator<searchNode>(){
+
+ 		@Override
+ 		public int compare(searchNode node0, searchNode node1) {
+ 			int hamming0 = node0.moves + node0.initial.manhattan();
+ 			int hamming1 = node1.moves + node1.initial.manhattan();
+ 			return  Double.compare((double) hamming0, (double) hamming1); 
+ 		}
+     };
+    
+	public Solver(Board initial){           // find a solution to the initial board (using the A* algorithm)
+        this.initial = initial;
+        solvable = false;
+        searchNode node = new searchNode(initial, null, 0);
+        searchNode twinnode = new searchNode(initial.twin(), null, 0);
+        trials = new MinPQ<searchNode>(hummingcomparator);
+        twintrials = new MinPQ<searchNode>(hummingcomparator);
+        Set<Board> items = new HashSet<Board>();
+        trials.insert(node);
+        twintrials.insert(twinnode);
+        items.add(initial);
+
+        while ( !trials.isEmpty() && ! twintrials.isEmpty()) {
+        	searchNode current = trials.delMin();
+        	searchNode twincurrent = twintrials.delMin();
+        
+        	
+            //System.out.println(current.initial.toString());
+        	//StdOut.println("twin: ");
+        	//System.out.println(twincurrent.initial.toString());
+
+        	if (current.initial.isGoal()) {
+        		//StdOut.println("Done!");
+        		//StdOut.println(current.initial.toString());
+        		trials.insert(current);
+        		solvable = true;
+        		break;
+        	}
+        	else if (twincurrent.initial.isGoal()){
+        		solvable = false;
+        		break;
+        	}
+        	else {
+        		Iterable<Board> leafs = current.initial.neighbors();
+        		Iterable<Board> twinleafs = twincurrent.initial.neighbors();
+        		for (Board leaf : leafs){
+        	      if (! leaf.equals(current.previous) && ! items.contains(leaf)){ 
+        			searchNode leafnode = new searchNode(leaf, current, current.moves + 1);
+        			//StdOut.println(leafnode.initial.toString());
+        			trials.insert(leafnode);
+        			items.add(leaf);
+        		  }
+        		}
+        	  	for (Board twinleaf : twinleafs){
+          	      if (! twinleaf.equals(twincurrent.previous)){ 
+          			searchNode twinleafnode = new searchNode(twinleaf, twincurrent, twincurrent.moves + 1);
+        			//StdOut.println("Twin Leafs: ");
+          			//StdOut.println(twinleafnode.initial.toString());
+          			twintrials.insert(twinleafnode);
+          		  }  
+        	    }
+        	}
+        }
+    }
+    
+	public boolean isSolvable(){            // is the initial board solvable?
+		return solvable;
+    }
+    
+    public int moves(){                     // min number of moves to solve initial board; -1 if unsolvable
+       if (! isSolvable()) return -1;
+       else {
+    	   searchNode result = trials.delMin();
+    	   trials.insert(result);
+    	   return result.moves;
+       }
+    }
+    
+    public Iterable<Board> solution(){
+		Stack <Board> result = new Stack<Board>();
+		searchNode currentNode = trials.delMin();
+		while (currentNode.previous != null){
+			result.push(currentNode.initial);
+			currentNode = currentNode.previous;
+		}
+		result.push(this.initial);
+    	return result;      // sequence of boards in a shortest solution; null if unsolvable
+     }
+	
+    private class searchNode{
+       public Board initial;
+       public searchNode previous;
+       public int moves;
+       public searchNode(Board initial, searchNode previous, int moves){
+    	   this.initial = initial;
+    	   this.previous = previous;
+    	   this.moves = moves;
+       }
+    }
+    
+    public static void main(String[] args){ // solve a slider puzzle (given below)
+    
+    	   // create initial board from file
+        //In in = new In(args[0]);
+    	String filename = "./DB/8puzzle/puzzle27.txt";
+    	In in = new In(filename);
+        int N = in.readInt();
+        int[][] blocks = new int[N][N];
+        for (int i = 0; i < N; i++)
+            for (int j = 0; j < N; j++)
+                blocks[i][j] = in.readInt();
+        Board initial = new Board(blocks);
+        StdOut.println("manhattan() = " + initial.manhattan());
+
+        // solve the slider puzzle
+        Solver solver = new Solver(initial);
+        System.out.println(filename + ": " + solver.moves());
+
+        /*
+        // print solution to standard output
+        if (!solver.isSolvable())
+            StdOut.println("No solution possible");
+        else {
+            StdOut.println("Minimum number of moves = " + solver.moves());
+            //for (Board board : solver.solution())
+                //StdOut.println(board);
+        }
+        */
+
+    }
+}

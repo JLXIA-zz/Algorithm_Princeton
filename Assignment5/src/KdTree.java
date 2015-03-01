@@ -74,9 +74,11 @@ public class KdTree {
 	   
 	   private void drawHelper(Node current) {
           if (current == null) return;
+          
           StdDraw.setPenColor(StdDraw.BLACK);
+          StdDraw.setPenRadius(.01);
+
           StdDraw.point(current.node.x(), current.node.y());
-          /*
           if (current.direction) {
               StdDraw.setPenColor(StdDraw.RED);
               StdDraw.setPenRadius(.002);
@@ -85,17 +87,19 @@ public class KdTree {
               double y1 = (current.parent == null) ? 1 : (current.node.y() < current.parent.node.y()) ? current.parent.node.y() : 1;
               StdDraw.line(x0, y0, x0, y1);
           }
+
           else {
-        	  StdDraw.setPenColor(StdDraw.BLUE);
-        	  StdDraw.setPenRadius(.002);
+          StdDraw.setPenColor(StdDraw.BLUE);
+          StdDraw.setPenRadius(.002);
               double x0 = (current.node.x() < current.parent.node.x()) ? 0: current.parent.node.x();
               double x1 = (current.node.x() < current.parent.node.x()) ? current.parent.node.x() : 1;
               double y0 = current.node.y();
               StdDraw.line(x0, y0, x1, y0);
           }
-          */
-          while (current.left != null) drawHelper(current.left);
-          while (current.right != null) drawHelper(current.right);
+          
+          if (current.left != null)  drawHelper(current.left);
+          if (current.right != null) drawHelper(current.right);
+          
 	   }
 
 	   // all points that are inside the rectangle 
@@ -173,6 +177,7 @@ public class KdTree {
 
            
            StdDraw.clear();
+           StdDraw.setPenColor(StdDraw.BLACK);
            StdDraw.setPenRadius(.01);
            pic.draw();
 	   }
