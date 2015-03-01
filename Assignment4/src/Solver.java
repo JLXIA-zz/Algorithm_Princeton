@@ -10,9 +10,10 @@ import java.util.Comparator;
 
 
 public class Solver {
+    private boolean isSolvable;
+    private int move = -1;
+    private Stack<Board> solutionqueue = new Stack<Board>();
     private MinPQ<searchNode> trials;
-    private Board initial;
-    private boolean isSolved;
     
     private static Comparator<searchNode> hummingcomparator = new Comparator<searchNode>(){
 
@@ -35,20 +36,33 @@ public class Solver {
      };
     
 	public Solver(Board initial) {           // find a solution to the initial board (using the A* algorithm)
-        this.initial = initial;
         searchNode node = new searchNode(initial, null, 0, true);
         searchNode nodetwin = new searchNode(initial.twin(), null, 0, false);
-        trials = new MinPQ<searchNode>(hummingcomparator);
+        trials = new MinPQ<searchNode>(manhattancomparator);
         trials.insert(node);
         trials.insert(nodetwin);
-
-        while (!trials.isEmpty()) {
+        solve();
+	}
+        
+    private void solve() {
+        while (true) {
         	searchNode current = trials.delMin();
 
         	if (current.initial.isGoal()) {
-        		trials.insert(current);
-        		isSolved = current.twin;
-        		break;
+        		if ( !current.twin) {
+        			this.isSolvable = false;
+        			this.move = -1;
+        		}
+        		else {
+        			this.isSolvable = true;
+        			this.move = current.moves;
+        			this.solutionqueue.push(current.initial);
+        		    while (current.previous != null) {
+        		    	current = current.previous;
+        		    	this.solutionqueue.push(current.initial);
+        		    }
+        		}
+        	  break;
         	}
         
         	else {
@@ -65,28 +79,16 @@ public class Solver {
     }
     
 	public boolean isSolvable(){            // is the initial board solvable?
-		return isSolved;
+		return this.isSolvable;
     }
     
     public int moves(){                     // min number of moves to solve initial board; -1 if unsolvable
-       if (! isSolvable()) return -1;
-       else {
-    	   searchNode result = trials.delMin();
-    	   trials.insert(result);
-    	   return result.moves;
-       }
+       return this.move;
     }
     
     public Iterable<Board> solution(){
-    	if (!isSolved) return null;
-		Stack <Board> result = new Stack<Board>();
-		searchNode currentNode = trials.delMin();
-		while (currentNode.previous != null){
-			result.push(currentNode.initial);
-			currentNode = currentNode.previous;
-		}
-		result.push(this.initial);
-    	return result;      // sequence of boards in a shortest solution; null if unsolvable
+    	if (!isSolvable) return null;
+    	else return this.solutionqueue;      // sequence of boards in a shortest solution; null if unsolvable
      }
 	
     private class searchNode {
@@ -107,7 +109,7 @@ public class Solver {
     
     	// create initial board from file
         //In in = new In(args[0]);
-    	String filename = "./DB/8puzzle/puzzle16.txt";
+    	String filename = "./DB/8puzzle/puzzle11.txt";
         In in = new In(filename);
         int N = in.readInt();
         int[][] blocks = new int[N][N];
