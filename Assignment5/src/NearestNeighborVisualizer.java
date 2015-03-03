@@ -14,7 +14,9 @@
 public class NearestNeighborVisualizer {
 
     public static void main(String[] args) {
-        String filename = args[0];
+    	
+        //String filename = args[0];
+    	String filename = "./DB/kdtree/circle10000.txt";
         In in = new In(filename);
 
         StdDraw.show(0);
@@ -29,7 +31,10 @@ public class NearestNeighborVisualizer {
             kdtree.insert(p);
             brute.insert(p);
         }
-
+        
+        brute.draw();
+        
+        
         while (true) {
 
             // the location (x, y) of the mouse
@@ -55,5 +60,6 @@ public class NearestNeighborVisualizer {
             StdDraw.show(0);
             StdDraw.show(40);
         }
+        
     }
 }

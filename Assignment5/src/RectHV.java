@@ -87,7 +87,8 @@ public class RectHV {
     }
     
     public static void main(String[] args) {
-    	RectHV rec = new RectHV(0, 0, 1, 1);
+    	RectHV rec = new RectHV(0, 0.5, 1, 1);
+    	StdOut.println(rec.toString());
     	rec.draw();
     	
     	

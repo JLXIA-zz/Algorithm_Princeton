@@ -1,3 +1,6 @@
+import java.util.LinkedList;
+import java.util.List;
+
 /*
  * @author JL Xia
  * Princeton Algorithm Assignment5
@@ -46,6 +49,7 @@ public class KdTree {
 	   
 	   // does the Tree contain point p? 
 	   public boolean contains(Point2D p) {
+		    if (this.size == 0) return false;
 		    Node current = check(root, p);
 		    if (current.node.equals(p)) return true;
 		    else return false;
@@ -99,39 +103,43 @@ public class KdTree {
           
 	   }
 
+	   private List<Point2D> insideP;
 	   // all points that are inside the rectangle 
 	   public Iterable<Point2D> range(RectHV rect) {
-		   Stack<Point2D> insideP = new Stack<Point2D>();
-		   insideP = rangeHelper(rect, root, insideP );
+		   insideP = new LinkedList<Point2D>();
+		   if (this.size == 0) return insideP;
+		   rangeHelper(rect, root);
 		   return insideP;
 	   }
 	   
-	   private Stack<Point2D> rangeHelper(RectHV rect, Node node, Stack<Point2D> insideP) {
-		  if (rect.contains(node.node)) {
-			  insideP.push(node.node);
-			  if (node.left != null)  rangeHelper(rect, node.left, insideP);
-			  if (node.right != null) rangeHelper(rect, node.right, insideP);
-		  }
-		  else if (node.left != null && rect.intersects(node.left.rect)) rangeHelper(rect, node.left, insideP);
-		  else if (node.right != null&& rect.intersects(node.right.rect)) rangeHelper(rect, node.right, insideP);
-		   
-		  return insideP; 
+	   private void rangeHelper(RectHV rect, Node current) {
+		    if (rect.contains(current.node))  insideP.add(current.node);
+		    if (current.left != null) {
+		    	if (rect.intersects(current.left.rect)) rangeHelper(rect, current.left);
+		    }
+            if (current.right != null) {
+		    	if (rect.intersects(current.right.rect)) rangeHelper(rect, current.right);
+		    }
+            return;
 	   }
 	   
+	   private Point2D nearestP;
 	   // a nearest neighbor in the set to point p; null if the set is empty 
 	   public Point2D nearest(Point2D p) {
-		   return nearestHelper(root, root.node,  p);
+		   if (this.size == 0) return null;
+		   nearestP = root.node;
+		   nearestHelper(root, p);
+		   return nearestP;
 	   }
 	   
-	   private Point2D nearestHelper(Node current, Point2D nearestP, Point2D p) {
-		   nearestP = (p.distanceTo(nearestP) < p.distanceTo(current.node)) ? nearestP : current.node;
+	   private void nearestHelper(Node current, Point2D p) {
+		   nearestP = (p.distanceSquaredTo(nearestP) < p.distanceSquaredTo(current.node)) ? nearestP : current.node;
 		   if (current.left != null) {
-			   if (current.left.rect.distanceTo(p) < nearestP.distanceTo(p)) nearestP = nearestHelper(current.left, nearestP, p); 
+			   if (current.left.rect.distanceSquaredTo(p) < nearestP.distanceSquaredTo(p)) nearestHelper(current.left, p); 
 		   }
 		   if (current.right != null) {
-			   if (current.right.rect.distanceTo(p) < nearestP.distanceTo(p)) nearestP = nearestHelper(current.right, nearestP, p); 
+			   if (current.right.rect.distanceSquaredTo(p) < nearestP.distanceSquaredTo(p)) nearestHelper(current.right, p); 
 		   }
-		   return nearestP;
 	   }
 	   
 	   

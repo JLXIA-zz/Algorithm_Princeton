@@ -17,8 +17,7 @@ public class RangeSearchVisualizer {
 
     public static void main(String[] args) {
 
-        //String filename = args[0];
-        String filename = "./DB/kdtree/circle10.txt";
+        String filename = "./DB/kdtree/input80K.txt";
         In in = new In(filename);
 
 
@@ -43,7 +42,7 @@ public class RangeSearchVisualizer {
         StdDraw.clear();
         StdDraw.setPenColor(StdDraw.BLACK);
         StdDraw.setPenRadius(.01);
-        brute.draw();
+        kdtree.draw();
 
         while (true) {
             StdDraw.show(40);
@@ -75,7 +74,7 @@ public class RangeSearchVisualizer {
             StdDraw.clear();
             StdDraw.setPenColor(StdDraw.BLACK);
             StdDraw.setPenRadius(.01);
-            brute.draw();
+            //brute.draw();
 
             // draw the rectangle
             StdDraw.setPenColor(StdDraw.BLACK);
